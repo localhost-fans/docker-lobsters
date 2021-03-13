@@ -39,33 +39,18 @@ else
   bundle exec rake db:migrate
 fi
 
-# Set out SECRET_KEY
-if [ "$SECRET_KEY" = "" ]; then
-  echo "No SECRET_KEY provided, generating one now."
-  export SECRET_KEY=$(bundle exec rake secret)
-  echo "Your new secret key: $SECRET_KEY"
+# Set out SECRET_KEY_BASE
+if [ "$SECRET_KEY_BASE" = "" ]; then
+  echo "No SECRET_KEY_BASE provided, generating one now."
+  export SECRET_KEY_BASE=$(bundle exec rake secret)
+  echo "Your new secret key: $SECRET_KEY_BASE"
 fi
 
 # Compile our assets.
 if [ "$RAILS_ENV" = "production" ]; then
   bundle exec rake assets:precompile
+  bundle exec rake assets:clean
 fi
 
 # Start the rails application.
-bundle exec rails server -b 0.0.0.0 &
-pid="$!"
-trap "echo 'Stopping Lobsters - pid: $pid'; kill -SIGTERM $pid" SIGINT SIGTERM
-
-# Run the cron job every 5 minutes
-while : ; do
-  echo "Running cron jobs."
-  bundle exec ruby script/mail_new_activity.rb
-  bundle exec ruby script/post_to_twitter
-  sleep 300
-done &
-
-# Wait for process to end.
-while kill -0 $pid > /dev/null 2>&1; do
-    wait
-done
-echo "Exiting"
+bundle exec rails server -b 0.0.0.0

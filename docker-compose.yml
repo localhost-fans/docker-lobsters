@@ -32,9 +32,9 @@ services:
       - MARIADB_USER=root
       - LOBSTER_DATABASE=lobsters
       - LOBSTER_SITE_NAME="Example News"
-      - RAILS_ENV=development
+      - OPEN_SIGNUPS=true
+      - RAILS_ENV=production
       - LOBSTER_HOSTNAME=localhost
-      - VIRTUAL_HOST=localhost
       - RAILS_MAX_THREADS=5
     ports:
       - "3000:3000"
