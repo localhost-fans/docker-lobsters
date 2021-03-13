@@ -18,6 +18,10 @@ class << Rails.application
   def allow_new_users_to_invite?
     true
   end
+
+  def ssl?
+    false
+  end
 end
 
 Rails.application.routes.default_url_options[:host] = Rails.application.domain

@@ -20,21 +20,20 @@ services:
     volumes:
       - 'lobsters_database:/var/lib/mysql'
   app:
-    image: utensils/lobsters:latest
+    image: localhost-fans/lobsters:latest
     build:
       context: .
-      args:
-        DEVELOPER_BUILD: "false"
     environment:
       - MARIADB_HOST=database
       - MARIADB_PORT=3306
       - MARIADB_PASSWORD=password
       - MARIADB_USER=root
       - LOBSTER_DATABASE=lobsters
-      - LOBSTER_SITE_NAME="Example News"
+      - LOBSTER_SITE_NAME=LocalhostFans
       - OPEN_SIGNUPS=true
       - RAILS_ENV=production
       - LOBSTER_HOSTNAME=localhost
+      - VIRTUAL_HOST=localhost
       - RAILS_MAX_THREADS=5
     ports:
       - "3000:3000"

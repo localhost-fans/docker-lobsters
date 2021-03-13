@@ -18,7 +18,6 @@ LICENSE
 lobsters/.git
 lobsters/.github
 lobsters/.gitignore
-lobsters/.travis
 lobsters/log/*
 lobsters/tmp/*
 Makefile
