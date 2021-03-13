@@ -1,0 +1,71 @@
+
+version: '2.1'
+
+services:
+  proxy:
+    image: jwilder/nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - dhparam:/etc/nginx/dhparam
+      - certs:/etc/nginx/certs:ro
+  letsencrypt:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    volumes_from:
+      - proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - certs:/etc/nginx/certs:rw
+      - acme:/etc/acme.sh
+  database:
+    image: mariadb
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=lobsters
+    healthcheck:
+      test: "/usr/bin/mysql --user=root --password=password --execute \"SHOW DATABASES;\""
+      timeout: 5s
+      retries: 20
+    volumes:
+      - 'lobsters_database:/var/lib/mysql'
+  app:
+    image: localhost-fans/lobsters:latest
+    build:
+      context: .
+    environment:
+      - MARIADB_HOST=database
+      - MARIADB_PORT=3306
+      - MARIADB_PASSWORD=password
+      - MARIADB_USER=root
+      - LOBSTER_DATABASE=lobsters
+      - OPEN_SIGNUPS=true
+      - RAILS_ENV=production
+      - LOBSTER_SITE_NAME=${LOBSTER_SITE_NAME}
+      - LOBSTER_HOSTNAME=${LOBSTER_HOSTNAME}
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE}
+      - RAILS_MAX_THREADS=5
+      - VIRTUAL_HOST=${LOBSTER_HOSTNAME}
+      - LETSENCRYPT_HOST=${LOBSTER_HOSTNAME}
+      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
+    ports:
+      - "3000:3000"
+    depends_on:
+      database:
+        condition: service_healthy
+      proxy:
+        condition: service_started
+      letsencrypt:
+        condition: service_started
+
+volumes:
+  vhost:
+  html:
+  dhparam:
+  certs:
+  acme:
+  lobsters_database:
+    driver: local
