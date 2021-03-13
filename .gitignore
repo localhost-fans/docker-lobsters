@@ -52,3 +52,5 @@ build-iPhoneSimulator/
 docker-assets/config/certs/*
 !docker-assers/config/certs/.keep
 .DS_Store
+
+.env

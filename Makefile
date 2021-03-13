@@ -5,13 +5,17 @@ REPO_NAMESPACE          ?= localhost-fans
 REPO_USERNAME           ?= jiangplus
 IMAGE_NAME              ?= lobsters
 BASE_IMAGE              ?= ruby:2.7-alpine
-VERSION                 := $(shell git describe --tags --abbrev=0 2>/dev/null || git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "HEAD")
-VCS_REF                 := $(shell git rev-parse --short HEAD 2>/dev/null || echo "0000000")
+VERSION                 := $(shell cd lobsters ; git describe --tags --abbrev=0 2>/dev/null || git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "HEAD")
+VCS_REF                 := $(shell cd lobsters ; git rev-parse --short HEAD 2>/dev/null || echo "0000000")
 BUILD_DATE              := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 
 # Default target is to build container
 .PHONY: default build list push clean
 default: build
+
+puts:
+	echo $(VCS_REF)
+	echo $(VERSION)
 
 # Build the docker image
 build:
@@ -36,10 +40,27 @@ push:
 		docker push  $(REPO_NAMESPACE)/$(IMAGE_NAME):$(VCS_REF); \
 		docker push  $(REPO_NAMESPACE)/$(IMAGE_NAME):$(VERSION);
 
-# Remove existing images
-clean:
+rmi:
 	docker rmi $$(docker images $(REPO_NAMESPACE)/$(IMAGE_NAME) --format="{{.Repository}}:{{.Tag}}") --force
 
 console:
-	docker run -it $(REPO_NAMESPACE)/$(IMAGE_NAME):latest bundle exec rails console
+	docker-compose exec app bundle exec rails console
+
+createdb:
+	docker-compose exec app bundle exec rails db:create
+	docker-compose exec app bundle exec rails db:schema:load
+	docker-compose exec app bundle exec rails db:migrate
+	docker-compose exec app bundle exec rails db:seed
+
+migrate:
+	docker-compose exec app bundle exec rails db:migrate
+
+start:
+	docker-compose up
+
+stop:
+	docker-compose down
+
+clear:
+	docker-compose down --volumes
 

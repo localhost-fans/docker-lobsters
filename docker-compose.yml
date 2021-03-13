@@ -29,12 +29,13 @@ services:
       - MARIADB_PASSWORD=password
       - MARIADB_USER=root
       - LOBSTER_DATABASE=lobsters
-      - LOBSTER_SITE_NAME=LocalhostFans
       - OPEN_SIGNUPS=true
       - RAILS_ENV=production
-      - LOBSTER_HOSTNAME=localhost
-      - VIRTUAL_HOST=localhost
       - RAILS_MAX_THREADS=5
+      - LOBSTER_SITE_NAME=${LOBSTER_SITE_NAME}
+      - LOBSTER_HOSTNAME=${LOBSTER_HOSTNAME}
+      - VIRTUAL_HOST=${VIRTUAL_HOST}
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE}
     ports:
       - "3000:3000"
     depends_on:
